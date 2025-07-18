@@ -44,7 +44,7 @@ public class AuthController {
     public ResponseEntity<?> loginSeguro(@RequestBody User user) {
         User u = userService.loginSeguro(user.getUsername(), user.getPassword());
         if (u != null) {
-            String token = jwtUtil.generateToken(u.getUsername());
+            String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
             HashMap<String, String> response = new HashMap<>();
             response.put("token", token);
             return ResponseEntity.ok(response);
@@ -69,4 +69,29 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/admin")
+    public ResponseEntity<?> adminEndpoint(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String username = jwtUtil.extractUsername(token);
+        String role = jwtUtil.extractUserRole(token);
+
+        if (jwtUtil.isTokenValid(token, username) && "Admin".equals(role)) {
+            return ResponseEntity.ok("Acceso al panel de administración concedido");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: requiere rol ADMIN");
+        }
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> userEndpoint(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String username = jwtUtil.extractUsername(token);
+        String role = jwtUtil.extractUserRole(token);
+
+        if (jwtUtil.isTokenValid(token, username) && "User".equals(role)) {
+            return ResponseEntity.ok("Bienvenido usuario " + username);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: requiere rol USER");
+        }
+    }
 }
