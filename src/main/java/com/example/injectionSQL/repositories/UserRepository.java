@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import com.example.injectionSQL.models.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    
     //Esta es la version vulnerable a inyecciones SQL
     @Query(value = "SELECT * FROM users WHERE username = ?1 AND password = ?2", nativeQuery = true)
     User loginVulnerable (String username, String password);

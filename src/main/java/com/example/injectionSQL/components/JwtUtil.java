@@ -15,9 +15,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class JwtUtil {
     private final Key SECRET_KEY = Keys.hmacShaKeyFor("clave_super_secreta_para_jwt_256bits!".getBytes());
 
-    public String generateToken(String username, String role) {
-        Map <String, Object> claims = new HashMap<>();
+    public String generateToken(String username, String role, Integer id) {
+        Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
+        claims.put("id", id);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -38,13 +39,22 @@ public class JwtUtil {
     }
 
     public String extractUserRole(String token) {
-    return Jwts.parserBuilder()
-            .setSigningKey(SECRET_KEY)
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .get("role", String.class);
-}
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
+    public Integer extractUserId(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("id", Integer.class);
+    }
 
     public boolean isTokenValid(String token, String username) {
         return extractUsername(token).equals(username) && !isTokenExpired(token);

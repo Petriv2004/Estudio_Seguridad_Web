@@ -21,4 +21,8 @@ public class UserService {
     public User loginSeguro(String username, String password) {
         return userRepository.findByUsernameAndPassword(username, password);
     }
+
+    public User findUserById(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
 }

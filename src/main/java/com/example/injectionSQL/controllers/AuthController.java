@@ -15,6 +15,7 @@ import com.example.injectionSQL.components.JwtUtil;
 import com.example.injectionSQL.models.User;
 import com.example.injectionSQL.services.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/auth")
@@ -44,7 +45,7 @@ public class AuthController {
     public ResponseEntity<?> loginSeguro(@RequestBody User user) {
         User u = userService.loginSeguro(user.getUsername(), user.getPassword());
         if (u != null) {
-            String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
+            String token = jwtUtil.generateToken(u.getUsername(), u.getRole(), u.getId());
             HashMap<String, String> response = new HashMap<>();
             response.put("token", token);
             return ResponseEntity.ok(response);
@@ -93,5 +94,16 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: requiere rol USER");
         }
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader){
+        String token = authHeader.replace("Bearer ", "");
+        Integer userIdFromToken = jwtUtil.extractUserId(token);
+
+        if(!id.equals(userIdFromToken)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: no puedes acceder a este usuario");
+        }
+        return ResponseEntity.ok(userService.findUserById(id));  
     }
 }
