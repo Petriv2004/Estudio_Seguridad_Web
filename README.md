@@ -25,7 +25,7 @@ Incluye ejemplos simples de cómo se ven las fallas más comunes y cómo se pued
 
 ## 🧪 Vulnerabilidades abordadas
 
-- [ ] A01 - Control de acceso roto  
+- [x] A01 - Control de acceso roto  
 - [x] A03 - Inyección (SQL)  
 - [ ] A05 - Configuración de seguridad incorrecta  
 - [x] A07 - Fallos de autenticación  
