@@ -47,6 +47,16 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        User registeredUser = userService.registUser(user);
+        if (registeredUser != null) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Usuario registrado exitosamente");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El usuario ya existe");
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginSeguro(@RequestBody User user) {
         User existingUser = userService.findUserByUsername(user.getUsername());
