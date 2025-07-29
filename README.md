@@ -18,6 +18,7 @@ Incluye ejemplos simples de cómo se ven las fallas más comunes y cómo se pued
 
 - Java + Spring Boot
 - JWT para autenticación
+- BCrypt
 - Base de datos PostgreSQL
 - Postman para pruebas
 
@@ -26,7 +27,7 @@ Incluye ejemplos simples de cómo se ven las fallas más comunes y cómo se pued
 ## 🧪 Vulnerabilidades abordadas
 
 - [x] A01 - Control de acceso roto
-- [ ] A02 - Fallos criptográficos   
+- [x] A02 - Fallos criptográficos   
 - [x] A03 - Inyección (SQL)
 - [ ] A04 - Diseño no seguro
 - [x] A05 - Configuración de seguridad incorrecta
