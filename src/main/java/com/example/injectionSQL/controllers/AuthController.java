@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.injectionSQL.components.JwtUtil;
+import com.example.injectionSQL.components.LoginAttemptService;
+import com.example.injectionSQL.models.LoginAttempt;
 import com.example.injectionSQL.models.User;
 import com.example.injectionSQL.services.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +28,13 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public AuthController(UserService userService, JwtUtil jwtUtil) {
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
+    public AuthController(UserService userService, JwtUtil jwtUtil, LoginAttemptService loginAttemptService) {
         this.userService = userService;
         this.jwtUtil = jwtUtil;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @PostMapping("/login/vulnerable")
@@ -43,14 +49,25 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginSeguro(@RequestBody User user) {
-        User u = userService.loginSeguro(user.getUsername(), user.getPassword());
-        if (u != null) {
-            String token = jwtUtil.generateToken(u.getUsername(), u.getRole(), u.getId());
-            HashMap<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+        User existingUser = userService.findUserByUsername(user.getUsername());
+        if (existingUser != null) {
+            User u = userService.loginSeguro(user.getUsername(), user.getPassword());
+            if (u != null) {
+                if (loginAttemptService.isBlocked(u.getUsername())) {
+                    return ResponseEntity.status(HttpStatus.LOCKED)
+                            .body("Usuario bloqueado por demasiados intentos fallidos");
+                }
+                loginAttemptService.loginSecceeded(u.getUsername());
+                String token = jwtUtil.generateToken(u.getUsername(), u.getRole(), u.getId());
+                HashMap<String, String> response = new HashMap<>();
+                response.put("token", token);
+                return ResponseEntity.ok(response);
+            } else {
+                loginAttemptService.loginFailed(user.getUsername());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed");
+            }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
         }
     }
 
@@ -97,13 +114,14 @@ public class AuthController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader){
+    public ResponseEntity<?> getUserById(@PathVariable Integer id, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
         Integer userIdFromToken = jwtUtil.extractUserId(token);
 
-        if(!id.equals(userIdFromToken)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acceso denegado: no puedes acceder a este usuario");
+        if (!id.equals(userIdFromToken)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Acceso denegado: no puedes acceder a este usuario");
         }
-        return ResponseEntity.ok(userService.findUserById(id));  
+        return ResponseEntity.ok(userService.findUserById(id));
     }
 }

@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      User loginSecure(@Param("username") String username, @Param("password") String password);
 
      User findByUsernameAndPassword(String username, String password);
+
+     User findByUsername(String username);
 }
