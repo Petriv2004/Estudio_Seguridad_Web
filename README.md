@@ -31,7 +31,7 @@ Incluye ejemplos simples de cómo se ven las fallas más comunes y cómo se pued
 - [x] A03 - Inyección (SQL)
 - [ ] A04 - Diseño no seguro
 - [x] A05 - Configuración de seguridad incorrecta
-- [ ] A06 - Uso de componentes vulnerables 
+- [x] A06 - Uso de componentes vulnerables 
 - [x] A07 - Fallos de autenticación   
 - [ ] Más próximamente...
 
